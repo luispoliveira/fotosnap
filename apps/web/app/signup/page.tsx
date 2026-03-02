@@ -1,3 +1,5 @@
+"use client";
+
 import SignupForm from "@/components/auth/signup-form";
 
 export default function SignupPage() {
@@ -11,7 +13,7 @@ export default function SignupPage() {
             <a href="/login" className="font-medium text-primary hover:text-primary/90">Sign in here</a>
           </p>
         </div>
-        <SignupForm />
+        <SignupForm onSubmit={async (data) => console.log(data)} />
       </div>
     </div>
   )
