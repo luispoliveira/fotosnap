@@ -1,3 +1,5 @@
+"use client";
+
 import LoginForm from "@/components/auth/login-form";
 
 export default function LoginPage() {
@@ -11,7 +13,7 @@ export default function LoginPage() {
             <a href="/signup" className="font-medium text-primary hover:text-primary/90">Sign up here</a>
           </p>
         </div>
-        <LoginForm />
+        <LoginForm onSubmit={async (data) => console.log(data)} />
       </div>
     </div>
   )

@@ -15,7 +15,13 @@ interface SignupFormProps {
 export default function SignupForm({ onSubmit }: SignupFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<SignupFormData>({
-    resolver: zodResolver(signupSchema)
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: ""
+    }
   })
 
   const handleSubmit = async (data: SignupFormData) => {
