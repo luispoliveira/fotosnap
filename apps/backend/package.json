@@ -21,8 +21,11 @@
   },
   "dependencies": {
     "@nestjs/common": "^11.1.14",
+    "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.1.14",
     "@nestjs/platform-express": "^11.1.14",
+    "drizzle-orm": "^0.45.1",
+    "pg": "^8.19.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
@@ -35,6 +38,7 @@
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.3.3",
+    "@types/pg": "^8.18.0",
     "@types/supertest": "^7.2.0",
     "eslint": "^10.0.2",
     "eslint-config-prettier": "^10.1.8",
