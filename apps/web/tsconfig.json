@@ -8,6 +8,11 @@
     ],
     "declaration": false,
     "declarationMap": false,
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
     "strictNullChecks": true
   },
   "include": [
