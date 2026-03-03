@@ -8,6 +8,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { AppController } from './app.controller';
 import { DATABASE_CONNECTION } from './database/database-connection';
 import { DatabaseModule } from './database/database.module';
+import { PostsModule } from './posts/posts.module';
 @Module({
   imports: [
     ConfigModule.forRoot({}),
@@ -27,6 +28,7 @@ import { DatabaseModule } from './database/database.module';
       }),
       inject: [DATABASE_CONNECTION, ConfigService],
     }),
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [
