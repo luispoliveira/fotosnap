@@ -1,4 +1,5 @@
-import { MulterModuleOptions } from '@nestjs/platform-express';
+import { BadRequestException } from '@nestjs/common';
+import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { Request } from 'express';
 import { diskStorage } from 'multer';
 import { extname } from 'node:path';
@@ -15,9 +16,25 @@ export const editFileName = (
   callback(null, `${name}-${Date.now()}-${randomName}${fileExtName}`);
 };
 
-export const multerConfig: MulterModuleOptions = {
+const imageFileFilter = (
+  request: Request,
+  file: Express.Multer.File,
+  callback: any,
+) => {
+  if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+    return callback(new BadRequestException('Only image files are allowed!'));
+  }
+
+  callback(null, true);
+};
+
+export const multerConfig: MulterOptions = {
   storage: diskStorage({
     destination: './uploads/images',
     filename: editFileName,
   }),
+  fileFilter: imageFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
 };
