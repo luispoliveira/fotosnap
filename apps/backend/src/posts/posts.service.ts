@@ -1,9 +1,76 @@
-import { Injectable } from '@nestjs/common';
-import { CreatePostInput } from './schemas/trpc.schema';
+import { Inject, Injectable } from '@nestjs/common';
+import { desc } from 'drizzle-orm';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { UsersService } from 'src/auth/users/users.service';
+import { DATABASE_CONNECTION } from 'src/database/database-connection';
+import { schema } from 'src/database/database.module';
+import { post } from './schemas/schema';
+import { CreatePostInput, Post } from './schemas/trpc.schema';
 
 @Injectable()
 export class PostsService {
-  async create(createPostDto: CreatePostInput) {}
+  constructor(
+    @Inject(DATABASE_CONNECTION)
+    private readonly database: NodePgDatabase<typeof schema>,
+    private readonly usersService: UsersService,
+  ) {}
 
-  async findAll() {}
+  async create(createPostDto: CreatePostInput, userId: string) {
+    const [newPost] = await this.database
+      .insert(post)
+      .values({
+        userId,
+        caption: createPostDto.caption,
+        image: 'https://placehold.co/600x400',
+        likes: 0,
+        createdAt: new Date(),
+      })
+      .returning();
+
+    return this.formatPostResponse(newPost, userId);
+  }
+
+  async findAll(): Promise<Post[]> {
+    const posts = await this.database.query.post.findMany({
+      with: {
+        user: true,
+      },
+      orderBy: [desc(post.createdAt)],
+    });
+
+    return Promise.all(
+      posts.map((post) => ({
+        id: post.id,
+        image: post.image,
+        caption: post.caption,
+        likes: post.likes,
+        user: {
+          username: post.user.name,
+          avatar: 'https://placehold.co/100x100',
+        },
+        timestamp: post.createdAt.toISOString(),
+        comments: 0,
+      })),
+    );
+  }
+
+  private async formatPostResponse(
+    savedPost: typeof post.$inferSelect,
+    userId: string,
+  ): Promise<Post> {
+    const userInfo = await this.usersService.findById(userId);
+
+    return {
+      id: savedPost.id,
+      image: savedPost.image,
+      caption: savedPost.caption,
+      likes: savedPost.likes,
+      user: {
+        username: userInfo.name,
+        avatar: 'https://placehold.co/100x100',
+      },
+      timestamp: savedPost.createdAt.toISOString(),
+      comments: 0,
+    };
+  }
 }
