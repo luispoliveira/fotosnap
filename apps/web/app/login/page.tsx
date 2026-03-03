@@ -3,14 +3,24 @@
 import LoginForm from "@/components/auth/login-form";
 import { authClient } from "@/lib/auth/client";
 import { LoginFormData } from "@/lib/auth/schema";
+import { useRouter } from "next/navigation";
+import { UseFormSetError } from "react-hook-form";
 
 export default function LoginPage() {
-
-  const handleLogin = async (data: LoginFormData) => {
-    await authClient.signIn.email({
+  const router = useRouter()
+  const handleLogin = async (data: LoginFormData, setError: UseFormSetError<LoginFormData>) => {
+    const { error } = await authClient.signIn.email({
       email: data.email,
       password: data.password
     })
+
+    if (error) {
+      setError("root", {
+        message: error.message
+      })
+      return;
+    }
+    router.push('/')
   }
 
   return (

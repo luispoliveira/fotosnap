@@ -2,15 +2,15 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormRootError } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { LoginFormData, loginSchema } from "@/lib/auth/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormSetError } from "react-hook-form";
 
 interface LoginFormProps {
-  onSubmit: (data: LoginFormData) => Promise<void>
+  onSubmit: (data: LoginFormData, setError: UseFormSetError<LoginFormData>) => Promise<void>
 }
 
 export default function LoginForm({ onSubmit }: LoginFormProps) {
@@ -26,7 +26,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
   const handleSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
     try {
-      await onSubmit(data);
+      await onSubmit(data, form.setError);
     } catch (error) {
       console.error("Signup error:", error)
     } finally {
@@ -43,6 +43,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormRootError />
             <FormField control={form.control} name="email" render={({ field }) => (
               <FormItem>
                 <FormLabel>Email</FormLabel>
