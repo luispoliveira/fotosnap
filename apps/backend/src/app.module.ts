@@ -11,6 +11,7 @@ import { UsersModule } from './auth/users/users.module';
 import { DATABASE_CONNECTION } from './database/database-connection';
 import { DatabaseModule } from './database/database.module';
 import { PostsModule } from './posts/posts.module';
+import { UploadModule } from './upload/upload.module';
 @Module({
   imports: [
     ConfigModule.forRoot({}),
@@ -35,6 +36,7 @@ import { PostsModule } from './posts/posts.module';
     }),
     PostsModule,
     UsersModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [
