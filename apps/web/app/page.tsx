@@ -11,7 +11,23 @@ import { useState } from "react";
 export default function Home() {
   const [showUpdateModal, setShowUpdateModal] = useState(false)
 
-  const handleCreatePost = async (file: File, caption: string) => { }
+  const handleCreatePost = async (file: File, caption: string) => {
+    const formdata = new FormData();
+    formdata.append('image', file)
+
+    const uploadResponse = await fetch('/api/upload/image', {
+      method: 'POST',
+      body: formdata
+    })
+
+    if (!uploadResponse.ok) {
+      throw new Error('Failed to upload image')
+    }
+
+    const { filename } = await uploadResponse.json();
+    console.log(filename);
+
+  }
 
   return (
     <div className="min-h-screen bg-background">
