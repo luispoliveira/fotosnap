@@ -9,6 +9,7 @@ const nextConfig = {
     ];
   },
   images: {
+    dangerouslyAllowLocalIP: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -17,6 +18,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'placehold.co',
+      },
+      {
+        protocol: process.env.BACKEND_PROTOCOL,
+        hostname: process.env.BACKEND_HOST,
       },
     ],
   },
