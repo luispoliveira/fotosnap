@@ -46,7 +46,7 @@ export class PostsService {
         likes: post.likes,
         user: {
           username: post.user.name,
-          avatar: '',
+          avatar: post.user.image || '',
         },
         timestamp: post.createdAt.toISOString(),
         comments: 0,
@@ -67,7 +67,7 @@ export class PostsService {
       likes: savedPost.likes,
       user: {
         username: userInfo.name,
-        avatar: '',
+        avatar: userInfo.image || '',
       },
       timestamp: savedPost.createdAt.toISOString(),
       comments: 0,

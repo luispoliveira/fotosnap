@@ -1,4 +1,7 @@
 import { Card } from "@/components/ui/card";
+import { authClient } from "@/lib/auth/client";
+import { getImageUrl } from "@/lib/image";
+import { User } from "lucide-react";
 import Image from "next/image";
 
 interface Story {
@@ -8,12 +11,6 @@ interface Story {
 }
 
 const mockStories: Story[] = [
-  {
-    id: "your_story",
-    username: "Your Story",
-    avatar:
-      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=60&h=60&fit=crop&crop=face",
-  },
   {
     id: "1",
     username: "johndoe",
@@ -46,15 +43,46 @@ const mockStories: Story[] = [
   },
 ]
 export function Stories() {
+  const { data: session } = authClient.useSession();
 
   return (
     <Card className="p-4">
       <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-2">
+        <div
+          className="flex-col items-center space-y-1 shrink-0">
+          <div className="relative">
+            <div className="p-0.5 rounded-full bg-linear-to-tr from-yellow-400 to-fuchsia-600 bg-gray-200">
+              {
+                session?.user.image ? (
+                  <Image
+                    src={getImageUrl(session?.user.image)}
+                    alt="Your profile"
+                    width={60}
+                    height={60}
+                    className="w-16 h-16 rounded-full object-cover border-2 border-white" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    <User className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                )
+              }
+            </div>
+          </div>
+          <span className="text-xs text-center w-16 truncate" title={'Your Story'}>
+            {'Your Story'}
+          </span>
+        </div>
         {mockStories.map(story => (
-          <div key={story.id} className="flex-col items-center space-y-1 shrink-0">
+          <div key={story.id}
+            className="flex-col items-center space-y-1 shrink-0">
             <div className="relative">
               <div className="p-0.5 rounded-full bg-linear-to-tr from-yellow-400 to-fuchsia-600 bg-gray-200">
-                <Image width={64} height={64} src={story.avatar} alt={story.username} className="w-16 h-16 rounded-full object-cover border-2 border-white" />
+                <Image
+                  width={64}
+                  height={64}
+                  src={story.avatar}
+                  alt={story.username}
+                  className="w-16 h-16 rounded-full object-cover border-2 border-white" />
               </div>
             </div>
             <span className="text-xs text-center w-16 truncate" title={story.username}>

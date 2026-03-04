@@ -63,18 +63,20 @@ export default function AvatarUpload({ open, onOpenChange, onSubmit, currentAvat
         {
           !preview ? (
             <div>
-              {
-                currentAvatarUrl && (
-                  <div className="flex justify-center">
-                    <Image
-                      src={getImageUrl(currentAvatarUrl)}
-                      alt="Current Avatar"
-                      height={64} width={64}
-                      className="w-24 h-24 rounded-full object-cover border-muted"
-                    />
-                  </div>
-                )
-              }
+              <div className="space-y-4">
+                {
+                  currentAvatarUrl && (
+                    <div className="flex justify-center">
+                      <Image
+                        src={getImageUrl(currentAvatarUrl)}
+                        alt="Current Avatar"
+                        height={64} width={64}
+                        className="w-24 h-24 rounded-full object-cover border-muted"
+                      />
+                    </div>
+                  )
+                }
+              </div>
               <FileUploadArea onFileSelect={handleFileSelect} />
 
             </div>

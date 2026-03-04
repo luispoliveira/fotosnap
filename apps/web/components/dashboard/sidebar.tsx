@@ -4,6 +4,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Card } from "@/components/ui/card";
 import { authClient } from "@/lib/auth/client";
 import { getImageUrl } from "@/lib/image";
+import { trpc } from "@/lib/trpc/client";
 import { Camera, LogOut, User } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -59,6 +60,7 @@ const mockSuggestions: SuggestedUser[] = [
 export default function Sidebar() {
   const { data: session } = authClient.useSession();
   const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const utils = trpc.useUtils();
   const router = useRouter();
   session?.user.image
 
@@ -69,6 +71,25 @@ export default function Sidebar() {
   }
 
   const handleAvatarUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const uploadResponse = await fetch('/api/upload/image', {
+      method: 'POST',
+      body: formData,
+    })
+
+    if (!uploadResponse.ok) {
+      throw new Error('Failed to upload image');
+    }
+
+    const { filename } = await uploadResponse.json();
+
+    await authClient.updateUser({
+      image: filename
+    })
+
+    await utils.postsRouter.findAll.invalidate();
 
   }
 
