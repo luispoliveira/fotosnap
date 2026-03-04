@@ -15,19 +15,19 @@ export class PostsService {
     private readonly usersService: UsersService,
   ) {}
 
-  async create(createPostDto: CreatePostInput, userId: string) {
+  async create(createPostDto: CreatePostInput, userId: string): Promise<Post> {
     const [newPost] = await this.database
       .insert(post)
       .values({
         userId,
         caption: createPostDto.caption,
-        image: 'https://placehold.co/600x400',
+        image: createPostDto.image,
         likes: 0,
         createdAt: new Date(),
       })
       .returning();
 
-    return this.formatPostResponse(newPost, userId);
+    return await this.formatPostResponse(newPost, userId);
   }
 
   async findAll(): Promise<Post[]> {

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const createPostSchema = z.object({
+  image: z.string().min(1, 'Image is required'),
   caption: z
     .string()
     .max(2200, 'Caption must be at most 2200 characters long')
@@ -11,9 +12,9 @@ export const postSchema = z.object({
   id: z.number(),
   user: z.object({
     username: z.string(),
-    avatar: z.url(),
+    avatar: z.string(),
   }),
-  image: z.url(),
+  image: z.string(),
   caption: z.string(),
   likes: z.number(),
   comments: z.number(),

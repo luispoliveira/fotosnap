@@ -16,7 +16,10 @@ export class PostsRouter {
     output: postSchema,
   })
   async create(@Input() createPostDto: CreatePostInput) {
-    return this.postsService.create(createPostDto, '12345');
+    return this.postsService.create(
+      createPostDto,
+      'GPQHiec5cNTT5TqZYp0tRut8adCqGN9C',
+    );
   }
 
   @Query({ output: z.array(postSchema) })
