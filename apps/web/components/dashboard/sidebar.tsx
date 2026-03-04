@@ -3,10 +3,13 @@
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Card } from "@/components/ui/card";
 import { authClient } from "@/lib/auth/client";
-import { LogOut } from "lucide-react";
+import { getImageUrl } from "@/lib/image";
+import { Camera, LogOut, User } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "../ui/button";
+import AvatarUpload from "./avatar-upload";
 
 interface SuggestedUser {
   id: string;
@@ -55,18 +58,48 @@ const mockSuggestions: SuggestedUser[] = [
 
 export default function Sidebar() {
   const { data: session } = authClient.useSession();
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
   const router = useRouter();
+  session?.user.image
+
 
   const handleLogout = async () => {
     await authClient.signOut();
     router.push('/login')
   }
 
+  const handleAvatarUpload = async (file: File) => {
+
+  }
+
   return (
     <div className="space-y-6">
       <Card className="p-4">
         <div className="flex items-center space-x-3 mb-4">
-          <Image src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=60&h=60&fit=crop&crop=face" alt="Your profile" width={60} height={60} className="w-14 h-14 rounded-full" />
+          <div className="relative">
+            {
+              session?.user.image ? (
+                <Image src={getImageUrl(session?.user.image)} alt="Your profile" width={60} height={60} className="w-14 h-14 rounded-full" />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                </div>
+              )
+            }
+            <Button
+              variant={"ghost"}
+              size={"icon"}
+              title="Change avatar"
+              className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary text-primary-foreground rounded-full p-1 hover:bg-primary/90"
+              onClick={() => setShowAvatarModal(true)}
+            >
+              <Camera className="w-3 h-3" />
+            </Button>
+          </div>
+
+
+
+
           <div className="flex-1 min-w-0">
             <div className="font-semibold truncate">
               {session?.user.email}
@@ -114,6 +147,16 @@ export default function Sidebar() {
           }
         </div>
       </Card>
-    </div>
+
+      <AvatarUpload
+        open={showAvatarModal}
+        onOpenChange={setShowAvatarModal}
+        onSubmit={handleAvatarUpload}
+        currentAvatarUrl={session?.user.image || null}
+      >
+
+      </AvatarUpload>
+
+    </div >
   )
 }

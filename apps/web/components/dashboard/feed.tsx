@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { getImageUrl } from "@/lib/image";
 import { Heart, MessageCircle, User } from "lucide-react";
 import Image from "next/image";
 
@@ -24,16 +25,6 @@ interface FeedProps {
 
 export default function Feed({ posts }: FeedProps) {
 
-  const getImageUrl = (imagePath: string) => {
-    return `${process.env.NEXT_PUBLIC_API_URL}/uploads/images/${imagePath}`;
-  }
-
-  const getAvatarUrl = (avatarPath: string) => {
-    if (!avatarPath) {
-      return '';
-    }
-    return `${process.env.NEXT_PUBLIC_API_URL}/uploads/images/${avatarPath}`;
-  }
 
 
   return (
@@ -44,8 +35,8 @@ export default function Feed({ posts }: FeedProps) {
             <div className="flex items-center justify-between p-4">
               <div className="flex items-center space-x-3">
                 {
-                  getAvatarUrl(post.user.avatar) ? (
-                    <Image src={getAvatarUrl(post.user.avatar)}
+                  getImageUrl(post.user.avatar) ? (
+                    <Image src={getImageUrl(post.user.avatar)}
                       alt={post.user.username}
                       width={64}
                       height={64}
