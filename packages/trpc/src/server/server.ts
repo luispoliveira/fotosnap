@@ -53,6 +53,26 @@ const appRouter = t.router({
     deleteComment: publicProcedure.input(z.object({
       commentId: z.number(),
     })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
+  }),
+  storiesRouter: t.router({
+    createStory: publicProcedure.input(z.object({
+      image: z.string().min(1, 'Image is required'),
+    })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    getStories: publicProcedure.output(z.array(z.object({
+      userId: z.string(),
+      username: z.string(),
+      avatar: z.string(),
+      stories: z.array(z.object({
+        id: z.number(),
+        user: z.object({
+          username: z.string(),
+          avatar: z.string(),
+        }),
+        image: z.string(),
+        createdAt: z.string(),
+        expiresAt: z.string(),
+      })),
+    }))).query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
   })
 });
 export type AppRouter = typeof appRouter;

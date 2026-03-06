@@ -5,12 +5,14 @@ import { Pool } from 'pg';
 import * as authSchema from '../auth/schema';
 import * as comments from '../comments/schemas/schema';
 import * as postsSchema from '../posts/schemas/schema';
+import * as storiesSchema from '../stories/schema/schema';
 import { DATABASE_CONNECTION } from './database-connection';
 
 export const schema = {
   ...authSchema,
   ...postsSchema,
   ...comments,
+  ...storiesSchema,
 };
 
 @Module({

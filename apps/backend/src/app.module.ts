@@ -15,6 +15,7 @@ import { DatabaseModule } from './database/database.module';
 import { PostsModule } from './posts/posts.module';
 import { UploadModule } from './upload/upload.module';
 import { CommentsModule } from './comments/comments.module';
+import { StoriesModule } from './stories/stories.module';
 @Module({
   imports: [
     ConfigModule.forRoot({}),
@@ -43,6 +44,7 @@ import { CommentsModule } from './comments/comments.module';
     UsersModule,
     UploadModule,
     CommentsModule,
+    StoriesModule,
   ],
   controllers: [AppController],
   providers: [
