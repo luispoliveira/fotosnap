@@ -13,6 +13,7 @@ export default function Home() {
   const [showUpdateModal, setShowUpdateModal] = useState(false)
   const utils = trpc.useUtils();
   const posts = trpc.postsRouter.findAll.useQuery()
+  const stories = trpc.storiesRouter.getStories.useQuery()
   const createPost = trpc.postsRouter.create.useMutation({
     onSuccess: () => {
       utils.postsRouter.findAll.invalidate()
@@ -65,6 +66,12 @@ export default function Home() {
     }
   })
 
+  const createStory = trpc.storiesRouter.createStory.useMutation({
+    onSuccess: () => {
+      utils.storiesRouter.getStories.invalidate();
+    }
+  })
+
   const handleCreatePost = async (file: File, caption: string) => {
     const formdata = new FormData();
     formdata.append('image', file)
@@ -85,12 +92,31 @@ export default function Home() {
     })
   }
 
+  const handleStoryUpload = async (file: File) => {
+    const formdata = new FormData();
+    formdata.append('image', file)
+
+    const uploadResponse = await fetch('/api/upload/image', {
+      method: 'POST',
+      body: formdata
+    })
+
+    if (!uploadResponse.ok) {
+      throw new Error('Failed to upload image')
+    }
+
+    const { filename } = await uploadResponse.json();
+    await createStory.mutateAsync({
+      image: filename,
+    })
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <Stories />
+            <Stories storyGroups={stories.data || []} onStoryUpload={handleStoryUpload} />
             <Feed
               posts={posts.data || []}
               onLikePost={(postId) => likePost.mutate({ postId })}
