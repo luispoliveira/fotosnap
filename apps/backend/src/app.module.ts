@@ -6,7 +6,9 @@ import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { TRPCModule } from 'nestjs-trpc-v2';
+import { AppContext } from './app.context';
 import { AppController } from './app.controller';
+import { AuthTrpcMiddleware } from './auth/auth-trpc.middleware';
 import { UsersModule } from './auth/users/users.module';
 import { DATABASE_CONNECTION } from './database/database-connection';
 import { DatabaseModule } from './database/database.module';
@@ -19,6 +21,7 @@ import { UploadModule } from './upload/upload.module';
     TRPCModule.forRoot({
       autoSchemaFile: '../../packages/trpc/src/server',
       basePath: '/api/trpc',
+      context: AppContext,
     }),
     AuthModule.forRootAsync({
       imports: [DatabaseModule, ConfigModule],
@@ -41,6 +44,8 @@ import { UploadModule } from './upload/upload.module';
   ],
   controllers: [AppController],
   providers: [
+    AuthTrpcMiddleware,
+    AppContext,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,

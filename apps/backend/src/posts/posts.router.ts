@@ -1,4 +1,13 @@
-import { Input, Mutation, Query, Router } from 'nestjs-trpc-v2';
+import {
+  Ctx,
+  Input,
+  Mutation,
+  Query,
+  Router,
+  UseMiddlewares,
+} from 'nestjs-trpc-v2';
+import { AppContext } from 'src/app-context.interface';
+import { AuthTrpcMiddleware } from 'src/auth/auth-trpc.middleware';
 import z from 'zod';
 import { PostsService } from './posts.service';
 import {
@@ -8,6 +17,7 @@ import {
 } from './schemas/trpc.schema';
 
 @Router()
+@UseMiddlewares(AuthTrpcMiddleware)
 export class PostsRouter {
   constructor(private readonly postsService: PostsService) {}
 
@@ -15,11 +25,11 @@ export class PostsRouter {
     input: createPostSchema,
     output: postSchema,
   })
-  async create(@Input() createPostDto: CreatePostInput) {
-    return this.postsService.create(
-      createPostDto,
-      'GPQHiec5cNTT5TqZYp0tRut8adCqGN9C',
-    );
+  async create(
+    @Input() createPostDto: CreatePostInput,
+    @Ctx() context: AppContext,
+  ) {
+    return this.postsService.create(createPostDto, context.user.id);
   }
 
   @Query({ output: z.array(postSchema) })
