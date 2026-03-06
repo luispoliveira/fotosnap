@@ -1,11 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateCommentInput } from '@repo/trpc/schemas';
+import { Comment, CreateCommentInput } from '@repo/trpc/schemas';
 import { and, desc, eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DATABASE_CONNECTION } from 'src/database/database-connection';
 import { schema } from 'src/database/database.module';
 import { comment } from './schemas/schema';
-
 @Injectable()
 export class CommentsService {
   constructor(
@@ -22,7 +21,7 @@ export class CommentsService {
     });
   }
 
-  async findByPostId(postId: number) {
+  async findByPostId(postId: number): Promise<Comment[]> {
     const comments = await this.database.query.comment.findMany({
       where: and(eq(comment.postId, postId)),
       with: {
@@ -34,11 +33,11 @@ export class CommentsService {
     return comments.map((comment) => ({
       id: comment.id,
       text: comment.text,
+      createdAt: comment.createdAt.toISOString(),
       user: {
         username: comment.user.name,
         avatar: comment.user.image || '',
       },
-      timestamp: comment.createdAt.toISOString(),
     }));
   }
 

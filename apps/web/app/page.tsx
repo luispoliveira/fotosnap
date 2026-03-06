@@ -36,6 +36,35 @@ export default function Home() {
     },
   })
 
+  const createComment = trpc.commentsRouter.createComment.useMutation({
+    onSuccess: (_, variables) => {
+      utils.commentsRouter.findByPostId.invalidate({
+        postId: variables.postId
+      });
+
+      utils.postsRouter.findAll.setData(undefined, (oldData) => {
+        if (!oldData) return oldData;
+
+        return oldData.map((post) => {
+          if (post.id === variables.postId) {
+            return {
+              ...post,
+              comments: post.comments + 1,
+            }
+          }
+          return post;
+        })
+      });
+    }
+  })
+
+  const deleteComment = trpc.commentsRouter.deleteComment.useMutation({
+    onSuccess: (_, variables) => {
+      utils.commentsRouter.findByPostId.invalidate();
+      utils.postsRouter.findAll.invalidate();
+    }
+  })
+
   const handleCreatePost = async (file: File, caption: string) => {
     const formdata = new FormData();
     formdata.append('image', file)
@@ -62,7 +91,12 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <Stories />
-            <Feed posts={posts.data || []} onLikePost={(postId) => likePost.mutate({ postId })} />
+            <Feed
+              posts={posts.data || []}
+              onLikePost={(postId) => likePost.mutate({ postId })}
+              onAddComment={(postId, text) => createComment.mutate({ postId, text })}
+              onDeleteComment={(commentId) => deleteComment.mutate({ commentId })}
+            />
           </div>
           <div className="lg:sticky lg:top-8 lg:h-fit">
             <Sidebar />
