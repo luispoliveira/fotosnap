@@ -17,15 +17,15 @@ interface Post {
   likes: number;
   comments: number;
   timestamp: string;
+  isLiked?: boolean;
 }
 
 interface FeedProps {
   posts: Post[];
+  onLikePost: (postId: number) => void;
 }
 
-export default function Feed({ posts }: FeedProps) {
-
-
+export default function Feed({ posts, onLikePost }: FeedProps) {
 
   return (
     <div className="space-y-6">
@@ -62,8 +62,8 @@ export default function Feed({ posts }: FeedProps) {
             <div className="p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <Button variant="ghost" size="sm" onClick={() => { }} className="p-0 h-auto">
-                    <Heart className="w-6 h-6 text-foreground" />
+                  <Button variant="ghost" size="sm" onClick={() => onLikePost(post.id)} className="p-0 h-auto">
+                    <Heart className={`w-6 h-6 ${post.isLiked ? 'fill-red-500 text-red-500' : 'text-foreground'} `} />
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => { }} className="p-0 h-auto">
                     <MessageCircle className="w-6 h-6 text-foreground" />
@@ -84,7 +84,7 @@ export default function Feed({ posts }: FeedProps) {
               )}
 
               <div className="text-xs text-muted-foreground uppercase">
-                {post.timestamp}
+                {new Date(post.timestamp).toLocaleString()}
               </div>
             </div>
           </Card>
