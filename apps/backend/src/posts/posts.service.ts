@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { desc } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { UsersService } from 'src/auth/users/users.service';
 import { DATABASE_CONNECTION } from 'src/database/database-connection';
 import { schema } from 'src/database/database.module';
-import { post } from './schemas/schema';
+import { like, post } from './schemas/schema';
 import { CreatePostInput, Post } from './schemas/trpc.schema';
 
 @Injectable()
@@ -15,62 +15,54 @@ export class PostsService {
     private readonly usersService: UsersService,
   ) {}
 
-  async create(createPostDto: CreatePostInput, userId: string): Promise<Post> {
-    const [newPost] = await this.database
+  async create(createPostDto: CreatePostInput, userId: string) {
+    await this.database
       .insert(post)
       .values({
         userId,
         caption: createPostDto.caption,
         image: createPostDto.image,
-        likes: 0,
         createdAt: new Date(),
       })
       .returning();
-
-    return await this.formatPostResponse(newPost, userId);
   }
 
-  async findAll(): Promise<Post[]> {
+  async findAll(userId: string): Promise<Post[]> {
     const posts = await this.database.query.post.findMany({
       with: {
         user: true,
+        likes: true,
       },
       orderBy: [desc(post.createdAt)],
     });
 
-    return Promise.all(
-      posts.map((post) => ({
-        id: post.id,
-        image: post.image,
-        caption: post.caption,
-        likes: post.likes,
-        user: {
-          username: post.user.name,
-          avatar: post.user.image || '',
-        },
-        timestamp: post.createdAt.toISOString(),
-        comments: 0,
-      })),
-    );
+    return posts.map((post) => ({
+      id: post.id,
+      image: post.image,
+      caption: post.caption,
+      likes: post.likes.length,
+      user: {
+        username: post.user.name,
+        avatar: post.user.image || '',
+      },
+      timestamp: post.createdAt.toISOString(),
+      comments: 0,
+      isLiked: post.likes.some((like) => like.userId === userId),
+    }));
   }
 
-  private async formatPostResponse(
-    savedPost: typeof post.$inferSelect,
-    userId: string,
-  ): Promise<Post> {
-    const userInfo = await this.usersService.findById(userId);
+  async likePost(postId: number, userId: string) {
+    const existingLike = await this.database.query.like.findFirst({
+      where: and(eq(like.postId, postId), eq(like.userId, userId)),
+    });
 
-    return {
-      id: savedPost.id,
-      image: savedPost.image,
-      caption: savedPost.caption,
-      likes: savedPost.likes,
-      user: {
-        username: userInfo.name,
-        avatar: userInfo.image || '',
-      },
-      timestamp: savedPost.createdAt.toISOString(),
-      comments: 0,
-    };
+    if (existingLike) {
+      await this.database.delete(like).where(eq(like.id, existingLike.id));
+    } else {
+      await this.database.insert(like).values({
+        postId,
+        userId,
+      });
+    }
   }
 }
