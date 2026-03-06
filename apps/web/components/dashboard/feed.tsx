@@ -3,22 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getImageUrl } from "@/lib/image";
+import { Post } from "@repo/trpc/schemas";
 import { Heart, MessageCircle, User } from "lucide-react";
 import Image from "next/image";
 
-interface Post {
-  id: number;
-  user: {
-    username: string;
-    avatar: string;
-  };
-  image: string;
-  caption: string;
-  likes: number;
-  comments: number;
-  timestamp: string;
-  isLiked?: boolean;
-}
+
 
 interface FeedProps {
   posts: Post[];
