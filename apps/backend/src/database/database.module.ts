@@ -3,12 +3,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import * as authSchema from '../auth/schema';
+import * as comments from '../comments/schemas/schema';
 import * as postsSchema from '../posts/schemas/schema';
 import { DATABASE_CONNECTION } from './database-connection';
 
 export const schema = {
   ...authSchema,
   ...postsSchema,
+  ...comments,
 };
 
 @Module({

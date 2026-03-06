@@ -1,4 +1,50 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { CreateCommentInput } from '@repo/trpc/schemas';
+import { and, desc, eq } from 'drizzle-orm';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { DATABASE_CONNECTION } from 'src/database/database-connection';
+import { schema } from 'src/database/database.module';
+import { comment } from './schemas/schema';
 
 @Injectable()
-export class CommentsService {}
+export class CommentsService {
+  constructor(
+    @Inject(DATABASE_CONNECTION)
+    private readonly database: NodePgDatabase<typeof schema>,
+  ) {}
+
+  async createComment(createCommentInput: CreateCommentInput, userId: string) {
+    await this.database.insert(comment).values({
+      userId,
+      postId: createCommentInput.postId,
+      text: createCommentInput.text,
+      createdAt: new Date(),
+    });
+  }
+
+  async findByPostId(postId: number) {
+    const comments = await this.database.query.comment.findMany({
+      where: and(eq(comment.postId, postId)),
+      with: {
+        user: true,
+      },
+      orderBy: [desc(comment.createdAt)],
+    });
+
+    return comments.map((comment) => ({
+      id: comment.id,
+      text: comment.text,
+      user: {
+        username: comment.user.name,
+        avatar: comment.user.image || '',
+      },
+      timestamp: comment.createdAt.toISOString(),
+    }));
+  }
+
+  async deleteComment(commentId: number, userId: string) {
+    await this.database
+      .delete(comment)
+      .where(and(eq(comment.id, commentId), eq(comment.userId, userId)));
+  }
+}

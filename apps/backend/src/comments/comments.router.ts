@@ -42,14 +42,8 @@ export class CommentsRouter {
     input: getCommentsSchema,
     output: z.array(commentSchema),
   })
-  async findByPostId(
-    @Input() getCommentsInput: GetCommentsInput,
-    @Ctx() context: AppContext,
-  ) {
-    return this.commentsService.findByPostId(
-      getCommentsInput.postId,
-      context.user.id,
-    );
+  async findByPostId(@Input() getCommentsInput: GetCommentsInput) {
+    return this.commentsService.findByPostId(getCommentsInput.postId);
   }
 
   @Mutation({
