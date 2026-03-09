@@ -1,8 +1,10 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { and, eq, ne, notInArray } from 'drizzle-orm';
+import { UpdateProfileInput } from '@repo/trpc/schemas';
+import { and, eq, ne, notInArray, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DATABASE_CONNECTION } from 'src/database/database-connection';
 import { schema } from 'src/database/database.module';
+import { post } from 'src/posts/schemas/schema';
 import { user } from '../schema';
 import { follow } from './../schema';
 
@@ -125,5 +127,46 @@ export class UsersService {
       },
       limit: 5,
     });
+  }
+
+  async getUserProfile(userId: string, currentUserId: string) {
+    const result = await this.database
+      .select({
+        id: user.id,
+        name: user.name,
+        displayName: user.displayName,
+        image: user.image,
+        bio: user.bio,
+        website: user.website,
+        followerCount: sql<number>`(
+        SELECT COUNT(*)::int
+        FROM ${follow} f
+        WHERE f.${follow.followingId} = ${user}.${user.id}
+      )`,
+        followingCount: sql<number>`(
+        SELECT COUNT(*)::int
+        FROM ${follow} f
+        WHERE f.${follow.followerId} = ${user}.${user.id}
+      )`,
+        postCount: sql<number>`(
+        SELECT COUNT(*)::int
+        FROM ${post} p
+        WHERE p.${post.userId} = ${user}.${user.id}
+      )`,
+        isFollowing: sql<boolean>`EXISTS (
+        SELECT 1
+        FROM ${follow} f
+        WHERE f.${follow.followerId} = ${currentUserId}
+          AND f.${follow.followingId} = ${user}.${user.id}
+      )`,
+      })
+      .from(user)
+      .where(eq(user.id, userId));
+
+    return result[0] || null;
+  }
+
+  async updateProfile(userId: string, updates: UpdateProfileInput) {
+    await this.database.update(user).set(updates).where(eq(user.id, userId));
   }
 }
