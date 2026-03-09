@@ -32,6 +32,6 @@ export const userProfileSchema = z.object({
 });
 
 export type User = z.infer<typeof userSchema>;
-export type UserId = z.infer<typeof userIdSchema>;
+export type UserIdInput = z.infer<typeof userIdSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type UserProfile = z.infer<typeof userProfileSchema>;
