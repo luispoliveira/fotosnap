@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { UpdateProfileInput } from '@repo/trpc/schemas';
+import { UpdateProfileInput, User, UserProfile } from '@repo/trpc/schemas';
 import { and, eq, ne, notInArray, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DATABASE_CONNECTION } from 'src/database/database-connection';
@@ -75,14 +75,14 @@ export class UsersService {
       );
   }
 
-  async getFollowers(userId: string) {
+  async getFollowers(userId: string): Promise<User[]> {
     const followers = await this.database.query.follow.findMany({
       where: eq(follow.followingId, userId),
       with: {
         follower: {
           columns: {
             id: true,
-            displayName: true,
+            name: true,
           },
         },
       },
@@ -91,14 +91,14 @@ export class UsersService {
     return followers.map((f) => f.follower);
   }
 
-  async getFollowing(userId: string) {
+  async getFollowing(userId: string): Promise<User[]> {
     const following = await this.database.query.follow.findMany({
       where: eq(follow.followerId, userId),
       with: {
         following: {
           columns: {
             id: true,
-            displayName: true,
+            name: true,
           },
         },
       },
@@ -107,7 +107,7 @@ export class UsersService {
     return following.map((f) => f.following);
   }
 
-  async getSuggestedUsers(userId: string) {
+  async getSuggestedUsers(userId: string): Promise<User[]> {
     const following = await this.database.query.follow.findMany({
       where: eq(follow.followerId, userId),
       columns: {
@@ -123,18 +123,20 @@ export class UsersService {
       ),
       columns: {
         id: true,
-        displayName: true,
+        name: true,
       },
       limit: 5,
     });
   }
 
-  async getUserProfile(userId: string, currentUserId: string) {
+  async getUserProfile(
+    userId: string,
+    currentUserId: string,
+  ): Promise<UserProfile> {
     const result = await this.database
       .select({
         id: user.id,
         name: user.name,
-        displayName: user.displayName,
         image: user.image,
         bio: user.bio,
         website: user.website,
