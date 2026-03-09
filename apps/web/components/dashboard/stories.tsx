@@ -6,6 +6,7 @@ import { Plus, User } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { Button } from "../ui/button";
+import StoryUpload from "./story-upload";
 
 
 interface StoriesProps {
@@ -94,6 +95,9 @@ export function Stories({ storyGroups, onStoryUpload }: StoriesProps) {
           </div>
         ))}
       </div>
+
+
+      <StoryUpload open={showCreateStory} onOpenChange={setShowCreateStory} onSubmit={onStoryUpload} />
     </Card>
   )
 
