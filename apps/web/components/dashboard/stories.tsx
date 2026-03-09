@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import StoryUpload from "./story-upload";
+import StoryViewer from "./story-viewer";
 
 
 interface StoriesProps {
@@ -18,6 +19,7 @@ export function Stories({ storyGroups, onStoryUpload }: StoriesProps) {
   const { data: session } = authClient.useSession();
   const [showCreateStory, setShowCreateStory] = useState(false);
   const [showStoryViewer, setShowStoryViewer] = useState(false);
+  const [selectedGroupIndex, setSelectedGroupIndex] = useState(0);
 
   const ownStoryGroup = storyGroups.find(group => group.userId === session?.user.id);
   const otherStoryGroups = storyGroups.filter(group => group.userId !== session?.user.id);
@@ -33,6 +35,7 @@ export function Stories({ storyGroups, onStoryUpload }: StoriesProps) {
               className={`p-0.5 rounded-full ${ownStoryGroup ? `bg-linear-to-tr from-yellow-400 to-fuchsia-600` : `bg-gray-200`}`}
               onClick={() => {
                 if (ownStoryGroup) {
+                  setSelectedGroupIndex(0);
                   setShowStoryViewer(true);
                 }
               }}
@@ -62,11 +65,12 @@ export function Stories({ storyGroups, onStoryUpload }: StoriesProps) {
             {'Your Story'}
           </span>
         </div>
-        {otherStoryGroups?.map((storyGroup) => (
+        {otherStoryGroups?.map((storyGroup, index) => (
           <div key={storyGroup.userId}
             className="flex-col items-center space-y-1 shrink-0"
             onClick={
               () => {
+                setSelectedGroupIndex(ownStoryGroup ? index + 1 : index);
                 setShowStoryViewer(true);
               }
             }
@@ -98,6 +102,8 @@ export function Stories({ storyGroups, onStoryUpload }: StoriesProps) {
 
 
       <StoryUpload open={showCreateStory} onOpenChange={setShowCreateStory} onSubmit={onStoryUpload} />
+
+      <StoryViewer storyGroups={storyGroups} initalGroupIndex={selectedGroupIndex} open={showStoryViewer} onOpenChange={setShowStoryViewer} />
     </Card>
   )
 
