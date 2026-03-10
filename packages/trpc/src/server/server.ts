@@ -13,7 +13,9 @@ const appRouter = t.router({
         .max(2200, 'Caption must be at most 2200 characters long')
         .min(1, 'Caption is required'),
     })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
-    findAll: publicProcedure.output(z.array(z.object({
+    findAll: publicProcedure.input(z.object({
+      userId: z.string().optional(),
+    })).output(z.array(z.object({
       id: z.number(),
       user: z.object({
         username: z.string(),

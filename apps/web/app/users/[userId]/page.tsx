@@ -2,7 +2,9 @@
 
 import ProfileHeader from "@/components/users/profile-header";
 import { ProfileNavigation } from "@/components/users/profile-navigation";
+import { ProfileTabs } from "@/components/users/profile-tabs";
 import { trpc } from "@/lib/trpc/client";
+import { Post } from "@repo/trpc/schemas";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
@@ -19,6 +21,8 @@ export default function ProfilePage() {
   });
   const utils = trpc.useUtils();
   const { data: profile, isLoading } = trpc.usersRouter.getUserProfile.useQuery({ userId });
+
+  const { data: posts = [] } = trpc.postsRouter.findAll.useQuery({ userId });
 
   const unfollowMutation = trpc.usersRouter.unfollow.useMutation({
     onSuccess: () => {
@@ -40,6 +44,10 @@ export default function ProfilePage() {
     } else {
       followMutation.mutate({ userId: profile.id });
     }
+  }
+
+  const handlePostClick = (post: Post) => {
+
   }
 
   if (isLoading) {
@@ -72,6 +80,13 @@ export default function ProfilePage() {
           onOpenFollowers={() => setFollowersFollowingModal({ open: true, type: 'followers' })}
           onOpenFollowing={() => setFollowersFollowingModal({ open: true, type: 'following' })}
           isFollowLoading={followMutation.isPending || unfollowMutation.isPending}
+        />
+
+        <ProfileTabs
+          userPosts={posts}
+          savedPosts={[]}
+          name={profile.name}
+          onPostClick={handlePostClick}
         />
       </div>
     </div>

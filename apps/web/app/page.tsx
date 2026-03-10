@@ -12,7 +12,7 @@ import { useState } from "react";
 export default function Home() {
   const [showUpdateModal, setShowUpdateModal] = useState(false)
   const utils = trpc.useUtils();
-  const posts = trpc.postsRouter.findAll.useQuery()
+  const posts = trpc.postsRouter.findAll.useQuery({})
   const stories = trpc.storiesRouter.getStories.useQuery()
   const createPost = trpc.postsRouter.create.useMutation({
     onSuccess: () => {
@@ -21,7 +21,7 @@ export default function Home() {
   })
   const likePost = trpc.postsRouter.likePost.useMutation({
     onMutate: ({ postId }) => {
-      utils.postsRouter.findAll.setData(undefined, (oldData) => {
+      utils.postsRouter.findAll.setData({}, (oldData) => {
         if (!oldData) return oldData;
         return oldData.map((post) => {
           if (post.id === postId) {
@@ -43,7 +43,7 @@ export default function Home() {
         postId: variables.postId
       });
 
-      utils.postsRouter.findAll.setData(undefined, (oldData) => {
+      utils.postsRouter.findAll.setData({}, (oldData) => {
         if (!oldData) return oldData;
 
         return oldData.map((post) => {
