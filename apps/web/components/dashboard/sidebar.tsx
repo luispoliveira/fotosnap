@@ -122,16 +122,25 @@ export default function Sidebar() {
 
 
           <div className="flex-1 min-w-0">
-            <div className="font-semibold truncate">
-              {session?.user.email}
-            </div>
-            <div className="text-sm text-muted-foreground truncate">
-              {session?.user.name}
-            </div>
+            <Button variant={"ghost"}
+              onClick={() => router.push(`/users/${session?.user.id}`)}
+              className="text-left w-full h-auto p-0 hover:bg-transparent hover:opacity-80 transition-opacity">
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold truncate">
+                  {session?.user.email}
+                </div>
+                <div className="text-sm text-muted-foreground truncate">
+                  {session?.user.name}
+                </div>
+              </div>
+            </Button>
           </div>
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <ThemeToggle />
-            <Button variant={"ghost"} size={"icon"} className="text-muted-foreground hover:text-foreground" onClick={handleLogout} title="Sign Out">
+            <Button variant={"ghost"}
+              size={"icon"}
+              className="text-muted-foreground hover:text-foreground"
+              onClick={handleLogout} title="Sign Out">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>

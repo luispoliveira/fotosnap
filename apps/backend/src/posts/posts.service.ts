@@ -44,6 +44,7 @@ export class PostsService {
       caption: post.caption,
       likes: post.likes.length,
       user: {
+        id: post.user.id,
         username: post.user.name,
         avatar: post.user.image || '',
       },

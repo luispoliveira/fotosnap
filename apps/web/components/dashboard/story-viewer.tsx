@@ -2,6 +2,7 @@ import { getImageUrl } from "@/lib/image";
 import { StoryGroup } from "@repo/trpc/schemas";
 import { ChevronLeft, ChevronRight, User, X } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent } from "../ui/dialog";
@@ -14,6 +15,7 @@ interface StoryViewerProps {
 }
 
 export default function StoryViewer({ storyGroups, open, onOpenChange, initalGroupIndex }: StoryViewerProps) {
+  const router = useRouter();
   const [currentGroupIndex, setCurrentGroupIndex] = useState(initalGroupIndex);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -90,7 +92,10 @@ export default function StoryViewer({ storyGroups, open, onOpenChange, initalGro
             }
           </div>
           <div className="absolute top-4 left-0 right-0 z-20 flex items-center justify-between px-4 pt-2">
-            <button className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+            <Button
+              variant={"ghost"}
+              className="flex items-center space-x-3 h-auto p-0 hover:bg-transparent hover:opacity-80 transition-opacity"
+              onClick={() => router.push(`/users/${currentGroup.userId}`)}>
               {
                 currentGroup.avatar ? (
                   <Image src={getImageUrl(currentGroup.avatar)}
@@ -110,7 +115,7 @@ export default function StoryViewer({ storyGroups, open, onOpenChange, initalGro
                   {currentGroup.username}
                 </div>
               </div>
-            </button>
+            </Button>
 
             <div className="flex items-center gap-2">
               <Button variant={"ghost"} size={"icon"} onClick={handleClose} className="text-white hover:bg-white/20">

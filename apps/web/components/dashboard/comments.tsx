@@ -2,6 +2,7 @@ import { getImageUrl } from "@/lib/image";
 import { Comment } from "@repo/trpc/schemas";
 import { Trash2, User } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -14,7 +15,7 @@ interface CommentsProps {
 
 export default function Comments({ comments, onAddComment, onDeleteComment }: CommentsProps) {
   const [commentText, setCommentText] = useState("");
-
+  const router = useRouter();
   const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     if (commentText.trim()) {
@@ -29,19 +30,23 @@ export default function Comments({ comments, onAddComment, onDeleteComment }: Co
         {
           comments.map((comment) => (
             <div key={comment.id} className="flex items-start space-x-2">
-              {
-                getImageUrl(comment.user.avatar) ? (
-                  <Image src={getImageUrl(comment.user.avatar)} alt={comment.user.username} width={32} height={32} className="w-8 h-8 rounded-full shrink-0" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                    <User className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                )
-              }
+              <Button variant={"ghost"} onClick={() => router.push(`/users/${comment.user.id}`)} className="p-0 pt-3">
+                {
+                  getImageUrl(comment.user.avatar) ? (
+                    <Image src={getImageUrl(comment.user.avatar)} alt={comment.user.username} width={32} height={32} className="w-8 h-8 rounded-full shrink-0" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                      <User className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                  )
+                }
+              </Button>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <span className="font-semibold text-sm">{comment.user.username}</span>
+                    <Button variant={"ghost"} onClick={() => router.push(`/users/${comment.user.id}`)} className="font-semibold text-sm p-0 mt-1">
+                      {comment.user.username}
+                    </Button>
                     <p className="text-sm wrap-break-word">
                       {comment.text}
                     </p>
