@@ -88,10 +88,10 @@ const appRouter = t.router({
       id: z.number(),
       text: z.string(),
       user: z.object({
+        id: z.string(),
         username: z.string(),
         avatar: z.string(),
       }),
-      // postId: z.number(),
       createdAt: z.string(),
     }))).query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     deleteComment: publicProcedure.input(z.object({

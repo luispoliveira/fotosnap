@@ -1,8 +1,10 @@
 "use client"
 
+import { authClient } from "@/lib/auth/client";
 import { getImageUrl } from "@/lib/image";
+import { trpc } from "@/lib/trpc/client";
 import { Post } from "@repo/trpc/schemas";
-import { User } from "lucide-react";
+import { Trash2, User } from "lucide-react";
 import Image from 'next/image';
 import { Button } from "../ui/button";
 import { Dialog, DialogContent } from "../ui/dialog";
@@ -14,6 +16,21 @@ interface PostModalProps {
 }
 
 export function PostModal({ post, open, onOpenChange }: PostModalProps) {
+
+  const { data: comments = [] } = trpc.commentsRouter.findByPostId.useQuery({ postId: post.id });
+  const utils = trpc.useUtils();
+  const { data: session } = authClient.useSession();
+
+  const deleteCommentMutation = trpc.commentsRouter.deleteComment.useMutation({
+    onSuccess: () => {
+      utils.commentsRouter.findByPostId.invalidate({ postId: post.id });
+      utils.postsRouter.findAll.invalidate({});
+    }
+  });
+
+  const handleDeleteComment = async (commentId: number) => {
+    await deleteCommentMutation.mutateAsync({ commentId });
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -62,15 +79,59 @@ export function PostModal({ post, open, onOpenChange }: PostModalProps) {
                         {post.user.username}
                       </Button>
                       <span className="text-sm">{post.caption}</span>
-                      <div className="text-xs text-muted-foreground">
-                        {new Date(post.timestamp).toLocaleDateString()}
-                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(post.timestamp).toLocaleDateString()}
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
+              <div className="space-y-3">
+                {
+                  comments.map(comment => (
+                    <div key={comment.id} className="flex items-start space-x-2">
+                      <Button variant={"ghost"} className="shrink-0 p-0 h-auto hover:bg-transparent">
+                        {
+                          getImageUrl(comment.user.avatar) ? (
+                            <Image
+                              src={getImageUrl(comment.user.avatar)}
+                              alt={comment.user.username} width={32} height={32} className="w-8 h-8 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                              <User className="w-4 h-4 text-muted-foreground" />
+                            </div>
+                          )
+                        }
+                      </Button>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <Button variant={"ghost"} className="font-semibold text-sm p-0 h-auto hover:opacity-80 hover:bg-transparent">
+                              {comment.user.username}
+                            </Button>
+                            <p className="text-sm wrap-break-word">{comment.text}</p>
+                            <p className="text-xs text-muted-foreground">{new Date(comment.createdAt).toLocaleDateString()}</p>
+                          </div>
+                          {
+                            session?.user.id === comment.user.id && (
+                              <Button variant={"ghost"} size={"sm"} className="p-1 h-auto shrink-0" onClick={() => handleDeleteComment(comment.id)}>
+                                <Trash2 className="w-3 h-3 text-muted-foreground" />
+                              </Button>
+                            )
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                }
+
+                {comments.length === 0 && (
+                  <p className="text-sm">No comments yet. Be the first to comment!</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </DialogContent>
