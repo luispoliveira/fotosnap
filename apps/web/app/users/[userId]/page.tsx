@@ -1,5 +1,6 @@
 "use client";
 
+import { PostModal } from "@/components/users/post-modal";
 import ProfileHeader from "@/components/users/profile-header";
 import { ProfileNavigation } from "@/components/users/profile-navigation";
 import { ProfileTabs } from "@/components/users/profile-tabs";
@@ -12,6 +13,8 @@ export default function ProfilePage() {
   const params = useParams();
   const userId = params.userId as string;
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [followesFollowingModal, setFollowersFollowingModal] = useState<{
     open: boolean;
     type: "followers" | "following";
@@ -47,7 +50,8 @@ export default function ProfilePage() {
   }
 
   const handlePostClick = (post: Post) => {
-
+    setSelectedPost(post);
+    setIsModalOpen(true);
   }
 
   if (isLoading) {
@@ -89,6 +93,14 @@ export default function ProfilePage() {
           onPostClick={handlePostClick}
         />
       </div>
+
+      {
+        selectedPost && (
+          <PostModal
+            post={selectedPost!} open={isModalOpen} onOpenChange={setIsModalOpen} />
+        )
+      }
+
     </div>
   )
 
