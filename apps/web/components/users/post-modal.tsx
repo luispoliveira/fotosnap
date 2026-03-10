@@ -4,10 +4,12 @@ import { authClient } from "@/lib/auth/client";
 import { getImageUrl } from "@/lib/image";
 import { trpc } from "@/lib/trpc/client";
 import { Post } from "@repo/trpc/schemas";
-import { Trash2, User } from "lucide-react";
+import { Heart, Trash2, User } from "lucide-react";
 import Image from 'next/image';
+import { useState } from "react";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent } from "../ui/dialog";
+import { Input } from "../ui/input";
 
 interface PostModalProps {
   post: Post;
@@ -15,7 +17,11 @@ interface PostModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function PostModal({ post, open, onOpenChange }: PostModalProps) {
+export function PostModal({ post: initialPost, open, onOpenChange }: PostModalProps) {
+  const { data: allPosts } = trpc.postsRouter.findAll.useQuery({});
+  const post = allPosts?.find(p => p.id === initialPost.id) || initialPost;
+
+  const [commentText, setCommentText] = useState("");
 
   const { data: comments = [] } = trpc.commentsRouter.findByPostId.useQuery({ postId: post.id });
   const utils = trpc.useUtils();
@@ -28,8 +34,32 @@ export function PostModal({ post, open, onOpenChange }: PostModalProps) {
     }
   });
 
+  const likePostMutation = trpc.postsRouter.likePost.useMutation({
+    onSuccess: () => {
+      utils.postsRouter.findAll.invalidate({});
+      utils.usersRouter.getUserProfile.invalidate();
+    }
+  })
+
+  const createCommentMutation = trpc.commentsRouter.createComment.useMutation({
+    onSuccess: (_, variables) => {
+      setCommentText("");
+      utils.commentsRouter.findByPostId.invalidate({ postId: variables.postId });
+      utils.postsRouter.findAll.invalidate({});
+    }
+  });
+
   const handleDeleteComment = async (commentId: number) => {
     await deleteCommentMutation.mutateAsync({ commentId });
+  }
+
+  const handleLike = async () => {
+    await likePostMutation.mutateAsync({ postId: post.id });
+  }
+
+  const handleAddComment = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await createCommentMutation.mutateAsync({ postId: post.id, text: commentText });
   }
 
   return (
@@ -126,12 +156,38 @@ export function PostModal({ post, open, onOpenChange }: PostModalProps) {
                     </div>
                   ))
                 }
-
                 {comments.length === 0 && (
                   <p className="text-sm">No comments yet. Be the first to comment!</p>
                 )}
               </div>
             </div>
+
+            <div className="border-t p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-4">
+                  <Button variant={"ghost"} size={"icon"} onClick={handleLike} disabled={likePostMutation.isPending} className="p-0 h-auto">
+                    <Heart className={`h-6 w-6 ${post.isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+                  </Button>
+                </div>
+                <div className="font-semibold text-sm mb-3">
+                  {post.likes} likes
+                </div>
+              </div>
+
+              <div className="border-t p-4">
+                <form onSubmit={handleAddComment} className="flex items-center space-x-2">
+                  <Input value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="Add a comment..."
+                    className="flex-1"
+                  />
+                  <Button type="submit" disabled={!commentText.trim()} >
+                    Post
+                  </Button>
+                </form>
+              </div>
+            </div>
+
           </div>
         </div>
       </DialogContent>
