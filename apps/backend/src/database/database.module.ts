@@ -27,7 +27,7 @@ export const schema = {
 
         if (configService.get('NODE_ENV') === 'production') {
           const certPath = resolve(__dirname, '../../global-bundle.pem');
-          const certificate = readFileSync(certPath);
+          const certificate = readFileSync(certPath).toString();
           ssl = { ca: certificate };
         }
 
