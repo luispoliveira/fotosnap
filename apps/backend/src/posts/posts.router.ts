@@ -6,6 +6,8 @@ import {
   LikePostInput,
   likePostSchema,
   postSchema,
+  SavePostInput,
+  savePostSchema,
 } from '@repo/trpc/schemas';
 import {
   Ctx,
@@ -51,5 +53,22 @@ export class PostsRouter {
     @Ctx() context: AppContext,
   ) {
     return this.postsService.likePost(likePostDto.postId, context.user.id);
+  }
+
+  @Mutation({
+    input: savePostSchema,
+  })
+  async savePost(
+    @Input() savePostDto: SavePostInput,
+    @Ctx() context: AppContext,
+  ) {
+    return this.postsService.savePost(savePostDto.postId, context.user.id);
+  }
+
+  @Query({
+    output: z.array(postSchema),
+  })
+  async savedPosts(@Ctx() context: AppContext) {
+    return this.postsService.getSavedPosts(context.user.id);
   }
 }

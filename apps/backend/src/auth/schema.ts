@@ -8,7 +8,7 @@ import {
   timestamp,
 } from 'drizzle-orm/pg-core';
 import { comment } from 'src/comments/schemas/schema';
-import { like, post } from 'src/posts/schemas/schema';
+import { like, post, savedPost } from 'src/posts/schemas/schema';
 import { story } from 'src/stories/schema/schema';
 
 export const user = pgTable('user', {
@@ -109,6 +109,7 @@ export const userRelations = relations(user, ({ many }) => ({
   stories: many(story),
   followers: many(follow, { relationName: 'follower' }),
   following: many(follow, { relationName: 'following' }),
+  savedPosts: many(savedPost),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
