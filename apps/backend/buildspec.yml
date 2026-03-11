@@ -14,7 +14,7 @@ phases:
       - echo Running Turborepo tasks...
       - pnpm turbo run build --filter=backend
 
-  post-build:
+  post_build:
     commands:
       - echo Preparing files for Elastic Beanstalk deployment...
       - pnpm --filter=backend deploy --prod out
