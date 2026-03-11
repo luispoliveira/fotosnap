@@ -1,6 +1,7 @@
 "use client";
 
 import { EditProfileModal } from "@/components/dashboard/edit-profile-modal";
+import { FollowersFollowingModel } from "@/components/users/followers-following-modal";
 import { PostModal } from "@/components/users/post-modal";
 import ProfileHeader from "@/components/users/profile-header";
 import { ProfileNavigation } from "@/components/users/profile-navigation";
@@ -117,6 +118,15 @@ export default function ProfilePage() {
       }
 
       <EditProfileModal open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen} profile={profile} onSave={handleSaveProfile} />
+
+      <FollowersFollowingModel
+        open={followersFollowingModal.open}
+        type={followersFollowingModal.type}
+        onOpenChange={(open) => {
+          setFollowersFollowingModal({ ...followersFollowingModal, open })
+        }}
+        userId={userId}
+      />
 
     </div>
   )
