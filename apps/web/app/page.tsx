@@ -37,6 +37,25 @@ export default function Home() {
     },
   })
 
+  const savePost = trpc.postsRouter.savePost.useMutation({
+    onMutate: ({ postId }) => {
+      utils.postsRouter.findAll.setData({}, (old) => {
+        if (!old) return old;
+
+        return old.map(post => {
+          if (post.id === postId) {
+            return {
+              ...post,
+              isSaved: !post.isSaved
+            }
+          }
+
+          return post;
+        })
+      })
+    }
+  })
+
   const createComment = trpc.commentsRouter.createComment.useMutation({
     onSuccess: (_, variables) => {
       utils.commentsRouter.findByPostId.invalidate({
@@ -122,6 +141,7 @@ export default function Home() {
               onLikePost={(postId) => likePost.mutate({ postId })}
               onAddComment={(postId, text) => createComment.mutate({ postId, text })}
               onDeleteComment={(commentId) => deleteComment.mutate({ commentId })}
+              onSavedPost={(postId) => savePost.mutate({ postId })}
             />
           </div>
           <div className="lg:sticky lg:top-8 lg:h-fit">

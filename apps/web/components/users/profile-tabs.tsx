@@ -9,8 +9,9 @@ interface ProfileTabsProps {
   savedPosts: Post[];
   name: string;
   onPostClick: (post: Post) => void;
+  isOwnProfile: boolean
 }
-export function ProfileTabs({ userPosts, savedPosts, name, onPostClick }: ProfileTabsProps) {
+export function ProfileTabs({ userPosts, savedPosts, name, onPostClick, isOwnProfile }: ProfileTabsProps) {
   return (
     <Tabs defaultValue="posts" className="w-full">
       <TabsList className="w-full justify-start border-t">
@@ -18,10 +19,15 @@ export function ProfileTabs({ userPosts, savedPosts, name, onPostClick }: Profil
           <Grid className="h-4 w-4" />
           POSTS
         </TabsTrigger>
-        <TabsTrigger value="saved" className="gap-2">
-          <Bookmark className="h-4 w-4" />
-          SAVED
-        </TabsTrigger>
+        {
+          isOwnProfile && (
+            <TabsTrigger value="saved" className="gap-2">
+              <Bookmark className="h-4 w-4" />
+              SAVED
+            </TabsTrigger>
+          )
+        }
+
       </TabsList>
       <TabsContent value="posts" className="mt-6">
         {
@@ -32,16 +38,18 @@ export function ProfileTabs({ userPosts, savedPosts, name, onPostClick }: Profil
           )
         }
       </TabsContent>
-      <TabsContent value="saved" className="mt-6">
-        {
-          savedPosts.length === 0 ? (
-            <EmptyState icon={Bookmark} title="No Saved Posts Yet" description={`Save photos and videos to see them here`} />
-          ) : (
-            <PostsGrid posts={savedPosts} onPostClick={onPostClick} />
-          )
-        }
-      </TabsContent>
-
+      {
+        isOwnProfile && (
+          <TabsContent value="saved" className="mt-6">
+            {
+              savedPosts.length === 0 ? (
+                <EmptyState icon={Bookmark} title="No Saved Posts Yet" description={`Save photos and videos to see them here`} />
+              ) : (
+                <PostsGrid posts={savedPosts} onPostClick={onPostClick} />
+              )
+            }
+          </TabsContent>
+        )}
 
     </Tabs>
   )

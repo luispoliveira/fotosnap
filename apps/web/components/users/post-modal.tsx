@@ -4,7 +4,7 @@ import { authClient } from "@/lib/auth/client";
 import { getImageUrl } from "@/lib/image";
 import { trpc } from "@/lib/trpc/client";
 import { Post } from "@repo/trpc/schemas";
-import { Heart, Trash2, User } from "lucide-react";
+import { Bookmark, Heart, Trash2, User } from "lucide-react";
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -51,6 +51,13 @@ export function PostModal({ post: initialPost, open, onOpenChange }: PostModalPr
     }
   });
 
+  const savePostMutation = trpc.postsRouter.savePost.useMutation({
+    onSuccess: () => {
+      utils.postsRouter.findAll.invalidate();
+      utils.postsRouter.savedPosts.invalidate();
+    }
+  })
+
   const handleDeleteComment = async (commentId: number) => {
     await deleteCommentMutation.mutateAsync({ commentId });
   }
@@ -62,6 +69,10 @@ export function PostModal({ post: initialPost, open, onOpenChange }: PostModalPr
   const handleAddComment = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     await createCommentMutation.mutateAsync({ postId: post.id, text: commentText });
+  }
+
+  const handleSave = async () => {
+    await savePostMutation.mutateAsync({ postId: post.id })
   }
 
   return (
@@ -170,10 +181,16 @@ export function PostModal({ post: initialPost, open, onOpenChange }: PostModalPr
                   <Button variant={"ghost"} size={"icon"} onClick={handleLike} disabled={likePostMutation.isPending} className="p-0 h-auto">
                     <Heart className={`h-6 w-6 ${post.isLiked ? 'fill-red-500 text-red-500' : ''}`} />
                   </Button>
+                  <div className="font-semibold text-sm">
+                    {post.likes} likes
+                  </div>
                 </div>
-                <div className="font-semibold text-sm mb-3">
-                  {post.likes} likes
-                </div>
+
+                <Button variant={"ghost"} size={"icon"} onClick={handleSave} disabled={savePostMutation.isPending} className="p-0 h-auto">
+                  <Bookmark className={`h-6 w-6 ${post.isSaved ? 'fill-foreground' : ''}`} />
+                </Button>
+
+
               </div>
 
               <div className="border-t p-4">
