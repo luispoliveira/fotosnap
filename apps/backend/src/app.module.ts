@@ -10,12 +10,12 @@ import { AppContext } from './app.context';
 import { AppController } from './app.controller';
 import { AuthTrpcMiddleware } from './auth/auth-trpc.middleware';
 import { UsersModule } from './auth/users/users.module';
+import { CommentsModule } from './comments/comments.module';
 import { DATABASE_CONNECTION } from './database/database-connection';
 import { DatabaseModule } from './database/database.module';
 import { PostsModule } from './posts/posts.module';
-import { UploadModule } from './upload/upload.module';
-import { CommentsModule } from './comments/comments.module';
 import { StoriesModule } from './stories/stories.module';
+import { UploadModule } from './upload/upload.module';
 @Module({
   imports: [
     ConfigModule.forRoot({}),

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const publicRoutes = ['/login', '/signup'];
 
-export default function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (publicRoutes.includes(pathname)) return NextResponse.next();
