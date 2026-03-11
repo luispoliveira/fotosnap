@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateStoryInput, StoryGroup } from '@repo/trpc/schemas';
-import { gt } from 'drizzle-orm';
+import { and, eq, gt, inArray } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { follow } from 'src/auth/schema';
 import { DATABASE_CONNECTION } from 'src/database/database-connection';
 import { schema } from 'src/database/database.module';
 import { story } from './schema/schema';
@@ -26,8 +27,18 @@ export class StoriesService {
   }
 
   async getStories(userId: string): Promise<StoryGroup[]> {
+    const followingIds = await this.database
+      .select({ id: follow.followingId })
+      .from(follow)
+      .where(eq(follow.followerId, userId));
+
+    const userIds = [userId, ...followingIds.map((f) => f.id)];
+
     const stories = await this.database.query.story.findMany({
-      where: gt(story.expiresAt, new Date()),
+      where: and(
+        gt(story.expiresAt, new Date()),
+        inArray(story.userId, userIds),
+      ),
       with: {
         user: true,
       },

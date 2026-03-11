@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
-import { Dialog, DialogContent } from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
 interface StoryViewerProps {
   storyGroups: StoryGroup[];
@@ -78,6 +78,9 @@ export default function StoryViewer({ storyGroups, open, onOpenChange, initalGro
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
+      <DialogHeader>
+        <DialogTitle></DialogTitle>
+      </DialogHeader>
       <DialogContent className="max-w-md! w-full h-[90vh] p-0 overflow-hidden bg-black" showCloseButton={false}>
         <div className="relative w-full h-full flex items-center justify-center">
           <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 p-2">

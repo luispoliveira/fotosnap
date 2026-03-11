@@ -141,19 +141,23 @@ export default function Sidebar() {
                       user.image ? (
                         <Image
                           src={getImageUrl(user.image)}
-                          alt={user.name} className="w-8 h-8 rounded-full" width={40} height={40} />) : (
-                        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-between">
+                          alt={user.name}
+                          className="w-8 h-8 rounded-full object-cover"
+                          width={40}
+                          height={40}
+                        />) : (
+                        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                           <User className="w-4 h-4 text-muted-foreground" />
                         </div>
                       )
                     }
-                    <div className="min-w-0">
+                    <div className="min-w-0 text-left">
                       <div className="font-semibold text-sm">
                         {user.name}
                       </div>
                       {
                         user.bio && (
-                          <div className="text-sm text-muted-foreground truncate text-left">
+                          <div className="text-sm text-muted-foreground truncate">
                             {user.bio}
                           </div>
                         )
