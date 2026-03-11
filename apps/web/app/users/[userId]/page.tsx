@@ -5,6 +5,7 @@ import { PostModal } from "@/components/users/post-modal";
 import ProfileHeader from "@/components/users/profile-header";
 import { ProfileNavigation } from "@/components/users/profile-navigation";
 import { ProfileTabs } from "@/components/users/profile-tabs";
+import { authClient } from "@/lib/auth/client";
 import { trpc } from "@/lib/trpc/client";
 import { Post, UpdateProfileInput } from "@repo/trpc/schemas";
 import { useParams } from "next/navigation";
@@ -24,6 +25,8 @@ export default function ProfilePage() {
     type: "followers"
   });
   const utils = trpc.useUtils();
+  const { data: session } = authClient.useSession();
+
   const { data: profile, isLoading } = trpc.usersRouter.getUserProfile.useQuery({ userId });
 
   const { data: posts = [] } = trpc.postsRouter.findAll.useQuery({ userId });
@@ -95,6 +98,7 @@ export default function ProfilePage() {
           onOpenFollowers={() => setFollowersFollowingModal({ open: true, type: 'followers' })}
           onOpenFollowing={() => setFollowersFollowingModal({ open: true, type: 'following' })}
           isFollowLoading={followMutation.isPending || unfollowMutation.isPending}
+          isOwnProfile={session?.user.id === profile.id}
         />
 
         <ProfileTabs
