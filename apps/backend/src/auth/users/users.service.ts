@@ -1,10 +1,9 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { UpdateProfileInput, User, UserProfile } from '@repo/trpc/schemas';
+import { UpdateProfileInput, UserProfile } from '@repo/trpc/schemas';
 import { and, eq, ne, notInArray, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DATABASE_CONNECTION } from 'src/database/database-connection';
 import { schema } from 'src/database/database.module';
-import { post } from 'src/posts/schemas/schema';
 import { user } from '../schema';
 import { follow } from './../schema';
 
@@ -14,6 +13,37 @@ export class UsersService {
     @Inject(DATABASE_CONNECTION)
     private readonly database: NodePgDatabase<typeof schema>,
   ) {}
+
+  private profileSelect(currentUserId: string) {
+    return {
+      id: user.id,
+      name: user.name,
+      image: user.image,
+      bio: user.bio,
+      website: user.website,
+      followerCount: sql<number>`(
+        SELECT COUNT(*)::int
+        FROM "follow" f
+        WHERE f.followingId = "user"."id"
+      )`,
+      followingCount: sql<number>`(
+        SELECT COUNT(*)::int
+        FROM "follow" f
+        WHERE f.followerId = "user"."id"
+      )`,
+      postCount: sql<number>`(
+        SELECT COUNT(*)::int
+        FROM "post" p
+        WHERE p.userId = "user"."id"
+      )`,
+      isFollowing: sql<boolean>`EXISTS (
+        SELECT 1
+        FROM "follow" f
+        WHERE f.followerId = ${currentUserId}
+          AND f.followingId = "user"."id"
+      )`,
+    };
+  }
 
   async findById(userId: string) {
     const foundUser = await this.database.query.user.findFirst({
@@ -75,39 +105,29 @@ export class UsersService {
       );
   }
 
-  async getFollowers(userId: string): Promise<User[]> {
-    const followers = await this.database.query.follow.findMany({
-      where: eq(follow.followingId, userId),
-      with: {
-        follower: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    });
-
-    return followers.map((f) => f.follower);
+  async getFollowers(
+    userId: string,
+    currentUserId: string,
+  ): Promise<UserProfile[]> {
+    return this.database
+      .select(this.profileSelect(currentUserId))
+      .from(user)
+      .innerJoin(user, eq(follow.followerId, user.id))
+      .where(eq(follow.followingId, userId));
   }
 
-  async getFollowing(userId: string): Promise<User[]> {
-    const following = await this.database.query.follow.findMany({
-      where: eq(follow.followerId, userId),
-      with: {
-        following: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    });
-
-    return following.map((f) => f.following);
+  async getFollowing(
+    userId: string,
+    currentUserId: string,
+  ): Promise<UserProfile[]> {
+    return this.database
+      .select(this.profileSelect(currentUserId))
+      .from(user)
+      .innerJoin(user, eq(follow.followingId, user.id))
+      .where(eq(follow.followerId, userId));
   }
 
-  async getSuggestedUsers(userId: string): Promise<User[]> {
+  async getSuggestedUsers(userId: string): Promise<UserProfile[]> {
     const following = await this.database.query.follow.findMany({
       where: eq(follow.followerId, userId),
       columns: {
@@ -116,17 +136,18 @@ export class UsersService {
     });
     const followingIds = following.map((f) => f.followingId);
 
-    return this.database.query.user.findMany({
-      where: and(
-        ne(user.id, userId),
-        followingIds.length > 0 ? notInArray(user.id, followingIds) : undefined,
-      ),
-      columns: {
-        id: true,
-        name: true,
-      },
-      limit: 5,
-    });
+    return this.database
+      .select(this.profileSelect(userId))
+      .from(user)
+      .where(
+        and(
+          ne(user.id, userId),
+          followingIds.length > 0
+            ? notInArray(user.id, followingIds)
+            : undefined,
+        ),
+      )
+      .limit(5);
   }
 
   async getUserProfile(
@@ -134,34 +155,7 @@ export class UsersService {
     currentUserId: string,
   ): Promise<UserProfile> {
     const result = await this.database
-      .select({
-        id: user.id,
-        name: user.name,
-        image: user.image,
-        bio: user.bio,
-        website: user.website,
-        followerCount: sql<number>`(
-        SELECT COUNT(*)::int
-        FROM ${follow} f
-        WHERE f.${follow.followingId} = ${user}.${user.id}
-      )`,
-        followingCount: sql<number>`(
-        SELECT COUNT(*)::int
-        FROM ${follow} f
-        WHERE f.${follow.followerId} = ${user}.${user.id}
-      )`,
-        postCount: sql<number>`(
-        SELECT COUNT(*)::int
-        FROM ${post} p
-        WHERE p.${post.userId} = ${user}.${user.id}
-      )`,
-        isFollowing: sql<boolean>`EXISTS (
-        SELECT 1
-        FROM ${follow} f
-        WHERE f.${follow.followerId} = ${currentUserId}
-          AND f.${follow.followingId} = ${user}.${user.id}
-      )`,
-      })
+      .select(this.profileSelect(currentUserId))
       .from(user)
       .where(eq(user.id, userId));
 
