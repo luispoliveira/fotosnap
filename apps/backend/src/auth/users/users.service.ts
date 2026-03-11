@@ -24,23 +24,23 @@ export class UsersService {
       followerCount: sql<number>`(
         SELECT COUNT(*)::int
         FROM "follow" f
-        WHERE f.followingId = "user"."id"
+        WHERE f.following_id = "user"."id"
       )`,
       followingCount: sql<number>`(
         SELECT COUNT(*)::int
         FROM "follow" f
-        WHERE f.followerId = "user"."id"
+        WHERE f.follower_id = "user"."id"
       )`,
       postCount: sql<number>`(
         SELECT COUNT(*)::int
         FROM "post" p
-        WHERE p.userId = "user"."id"
+        WHERE p.user_id = "user"."id"
       )`,
-      isFollowing: sql<boolean>`EXISTS (
+      isFollowing: sql<boolean>`EXISTS(
         SELECT 1
         FROM "follow" f
-        WHERE f.followerId = ${currentUserId}
-          AND f.followingId = "user"."id"
+        WHERE f.follower_id = ${currentUserId}
+          AND f.following_id = "user"."id"
       )`,
     };
   }
@@ -111,7 +111,7 @@ export class UsersService {
   ): Promise<UserProfile[]> {
     return this.database
       .select(this.profileSelect(currentUserId))
-      .from(user)
+      .from(follow)
       .innerJoin(user, eq(follow.followerId, user.id))
       .where(eq(follow.followingId, userId));
   }
@@ -122,19 +122,16 @@ export class UsersService {
   ): Promise<UserProfile[]> {
     return this.database
       .select(this.profileSelect(currentUserId))
-      .from(user)
+      .from(follow)
       .innerJoin(user, eq(follow.followingId, user.id))
       .where(eq(follow.followerId, userId));
   }
 
   async getSuggestedUsers(userId: string): Promise<UserProfile[]> {
-    const following = await this.database.query.follow.findMany({
+    const followingIds = await this.database.query.follow.findMany({
       where: eq(follow.followerId, userId),
-      columns: {
-        followingId: true,
-      },
     });
-    const followingIds = following.map((f) => f.followingId);
+    const followingIdsList = followingIds.map((f) => f.followingId);
 
     return this.database
       .select(this.profileSelect(userId))
@@ -142,8 +139,8 @@ export class UsersService {
       .where(
         and(
           ne(user.id, userId),
-          followingIds.length > 0
-            ? notInArray(user.id, followingIds)
+          followingIdsList.length > 0
+            ? notInArray(user.id, followingIdsList)
             : undefined,
         ),
       )

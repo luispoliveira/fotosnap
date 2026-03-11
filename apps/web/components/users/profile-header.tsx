@@ -49,19 +49,25 @@ export default function ProfileHeader({ profile, onFollowToggle, onEditProfile, 
                 )
               }
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant={"outline"} size={"icon"}>
-                    <Settings className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={onEditProfile}>
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Profile
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {
+                isOwnProfile && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant={"outline"} size={"icon"}>
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={onEditProfile}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Profile
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )
+              }
+
+
             </div>
           </div>
 
