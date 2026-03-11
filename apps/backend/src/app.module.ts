@@ -35,7 +35,9 @@ import { UploadModule } from './upload/upload.module';
           emailAndPassword: {
             enabled: true,
           },
-          trustedOrigins: [configService.getOrThrow<string>('UI_URL')],
+          trustedOrigins: configService.get<string>('UI_URL')
+            ? [configService.get<string>('UI_URL')!]
+            : [],
         }),
       }),
       inject: [DATABASE_CONNECTION, ConfigService],
