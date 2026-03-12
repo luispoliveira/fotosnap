@@ -18,7 +18,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'placehold.co',
+        hostname: 'fotosnap-luispoliveira.s3.eu-central-1.amazonaws.com',
       },
       {
         protocol: process.env.BACKEND_PROTOCOL,

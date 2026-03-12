@@ -1,16 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { STORAGE_PROVIDER, StorageProvider } from './storage/storage.interface';
+import { generateFilename } from './upload.config';
 
 @Injectable()
 export class UploadService {
+  constructor(
+    @Inject(STORAGE_PROVIDER) private readonly storageProvider: StorageProvider,
+  ) {}
+
   async uploadImage(file: Express.Multer.File) {
-    // Here you would implement the logic to upload the file to a storage service
-    // For example, you could use AWS S3, Google Cloud Storage, or any other service
-    // For demonstration purposes, we'll just return the file information
+    const filename = generateFilename(file);
+
+    const url = await this.storageProvider.upload(file, filename);
+
     return {
-      originalname: file.originalname,
-      filename: file.filename,
-      mimetype: file.mimetype,
-      size: file.size,
+      filename,
+      url,
     };
   }
 }
