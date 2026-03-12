@@ -5,10 +5,14 @@
   "exports": {
     "./router": {
       "types": "./dist/server/server.d.ts",
+      "require": "./dist/server/server.js",
+      "import": "./dist/server/server.js",
       "default": "./dist/server/server.js"
     },
     "./schemas": {
       "types": "./dist/schemas/index.d.ts",
+      "require": "./dist/schemas/index.js",
+      "import": "./dist/schemas/index.js",
       "default": "./dist/schemas/index.js"
     }
   },
